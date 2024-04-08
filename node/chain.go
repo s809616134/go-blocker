@@ -100,6 +100,19 @@ func (c *Chain) addBlock(b *proto.Block) error {
 				return err
 			}
 		}
+
+		for _, input := range tx.Inputs {
+			// retreive the key of map[string]*UTXO
+			key := fmt.Sprintf("%s_%d", hex.EncodeToString(input.PrevTxHash), input.PrevOutIndex)
+			utxo, err := c.utxoStore.Get(key)
+			if err != nil {
+				return err
+			}
+			utxo.Spent = true
+			if err := c.utxoStore.PUT(utxo); err != nil {
+				return err
+			}
+		}
 	}
 
 	return c.blockStore.Put(b)
@@ -159,6 +172,7 @@ func (c *Chain) ValidateTransaction(tx *proto.Transaction) error {
 	sumInputs := 0
 	for i := 0; i < nInputs; i++ {
 		prevHash := hex.EncodeToString(tx.Inputs[i].PrevTxHash)
+		// set the key of map[string]*UTXO
 		key := fmt.Sprintf("%s_%d", prevHash, i)
 		utxo, err := c.utxoStore.Get(key)
 		sumInputs += int(utxo.Amount)

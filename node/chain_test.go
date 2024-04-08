@@ -79,7 +79,7 @@ func TestAddBlockWithTxInsufficientFunds(t *testing.T) {
 		},
 	}
 	outputs := []*proto.TxOutput{
-		// send to much to recipient
+		// send too much to recipient
 		{
 			Amount:  1001,
 			Address: recipient,
@@ -140,5 +140,6 @@ func TestAddBlockWithTx(t *testing.T) {
 	tx.Inputs[0].Signature = sig.Bytes()
 
 	block.Transactions = append(block.Transactions, tx)
+	types.SignBlock(privKey, block)
 	require.Nil(t, chain.AddBlock(block))
 }

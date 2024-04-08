@@ -4,9 +4,25 @@ import (
 	"testing"
 
 	"github.com/s809616134/go-blocker/crypto"
+	"github.com/s809616134/go-blocker/proto"
 	"github.com/s809616134/go-blocker/util"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestCalculateRootHash(t *testing.T) {
+	var (
+		privKey = crypto.GeneratPrivateKey()
+		block   = util.RandomBlock()
+		tx      = &proto.Transaction{
+			Version: 1,
+		}
+	)
+	block.Transactions = append(block.Transactions, tx)
+	SignBlock(privKey, block)
+
+	assert.True(t, VerifyRootHash(block))
+	assert.Equal(t, 32, len(block.Header.RootHash))
+}
 
 func TestSignVerifyBlock(t *testing.T) {
 	var (
